@@ -336,6 +336,7 @@ export default {
             }
         };
 
+        
         const fetchUpdatedCarInfo = async () => {
             const carId = route.params.carId;
             try {
