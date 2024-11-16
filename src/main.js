@@ -1,4 +1,7 @@
 import { createApp } from 'vue'
-import App from './App.vue'
+import Carrental from './views/HomePage.vue'
+import router from './router'
 
-createApp(App).mount('#app')
+createApp(Carrental)
+    .use(router)
+    .mount('#app');
