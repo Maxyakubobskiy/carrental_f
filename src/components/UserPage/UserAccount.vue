@@ -124,15 +124,15 @@ export default {
         const router = useRouter();
 
         const logout = () => {
-            router.push('/login');
             localStorage.removeItem('token');
+            router.push('/login');
         };
 
         const deleteUser = () => {
             api.delete('/deleteUser')
                 .then(() => {
-                    router.push('/');
                     localStorage.removeItem('token');
+                    router.push('/');
                 })
                 .catch(error => console.error(error));
         };

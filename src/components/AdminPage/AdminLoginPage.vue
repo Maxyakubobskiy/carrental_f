@@ -2,7 +2,7 @@
     <main>
         <div class="container-form">
             <form @submit.prevent="submitForm">
-                <span>Увійдіть у ваш обліковий запис</span><br><br>
+                <span>Увійдіть в обліковий запис адміністратора</span><br><br>
 
                 <label for="username">Логін:</label><br>
                 <input type="text" id="username" v-model="username" required/><br><br>
@@ -19,10 +19,6 @@
                         Увійти
                         <img :src="signInIcon" alt="" style="filter: invert(100%)">
                     </button>
-                    <router-link to="/registration">
-                        Зареєструватися
-                        <img :src="userAddIcon" alt="" style="filter: invert(100%)">
-                    </router-link>
                 </div>
             </form>
         </div>
@@ -31,13 +27,12 @@
 
 <script>
 import signInIcon from '@/assets/images/sign-in.svg';
-import userAddIcon from '@/assets/images/user-add.svg';
 import api from '@/api/api';
+
 export default {
     data() {
         return {
             signInIcon,
-            userAddIcon,
             username: '',
             password: '',
             errorMessage: false
@@ -46,13 +41,13 @@ export default {
     methods: {
         async submitForm() {
             try {
-                const response = await api.post('/auth/login', {
+                const response = await api.post('/admin/login', {
                     username: this.username,
                     password: this.password
                 });
                 
                 localStorage.setItem('token', response.data)
-                this.$router.push('/');
+                this.$router.push('/admin');
             } catch (error) {
                 this.errorMessage = true;
             }
@@ -98,11 +93,6 @@ export default {
     font-size: 16px;
 }
 
-.container-button {
-    display: flex;
-    justify-content: space-between;
-}
-
 .container-button button {
     background-color: #282d3e;
     border-radius: 30px;
@@ -117,18 +107,5 @@ export default {
 
 .container-button img {
     margin-left: 10px;
-}
-
-.container-button a {
-    background-color: #282d3e;
-    border-radius: 30px;
-    padding: 10px 20px;
-    cursor: pointer;
-    color: aliceblue;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    border: none;
-    text-decoration: none;
 }
 </style>

@@ -98,7 +98,7 @@
                     <div class="car-reviews-container-text">
                         <span>Відгуки клієнтів</span>
                     </div>
-                    <button type="button" @click="openReviewModal" id="reviews-add-button">
+                    <button v-if="!isAdmin" type="button" @click="openReviewModal" id="reviews-add-button">
                         <img :src="messageIcon" alt="" style="filter: invert(100%)" />
                         <span>Додати відгук</span>
                     </button>
@@ -106,7 +106,7 @@
                         <div class="review-user">
                             <img :src="getRatingIcon(review.rating)" :alt="getRatingAlt(review.rating)" />
                         <span>{{ review.username }}</span>
-                        <div v-if="review.userId == currentUserId" class="button-delete-review" >
+                        <div v-if=" isAdmin || review.userId == currentUserId" class="button-delete-review" >
                             <button @click="deleteReview(review.reviewId)" id="delete-button-review">Видалити</button>
                         </div>
                         </div>
@@ -121,7 +121,7 @@
                     </div>
                 </div>
 
-                <div v-if="car.available" class="aside-info">
+                <div v-if="car.available && !isAdmin" class="aside-info">
                     <div class="aside-info-block">
                     <div class="aside-info-text">
                         <span>Орендувати</span>
@@ -139,6 +139,10 @@
                         </form>
                     </div>
                     </div>
+                </div>
+                <div v-if="isAdmin" class="aside-info-admin">
+                   <span>Змінити наявність</span>
+                   <button @click="changeAvailability(car.carId)">Змінити</button> 
                 </div>
                 </div>
 
@@ -171,7 +175,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/swiper-bundle.css';
 import ReviewModal from '@/components/CarInfoPage/ReviewModal.vue';
 import PaymentModal from '@/components/CarInfoPage/PaymentModal.vue';
-
+import { jwtDecode } from "jwt-decode";
 export default {
     components: {
         Swiper,
@@ -189,7 +193,25 @@ export default {
         const showPaymentModal = ref(false);
         const IsValidDate = ref(false);
         const currentUserId = ref(null);
+        const isAdmin = ref(false);
 
+        const checkUserRole = () => {
+            const token = localStorage.getItem('token');
+            const decodedToken = jwtDecode(token);
+            const userRole = decodedToken.roles;
+            if (userRole && userRole.includes('ROLE_ADMIN')) {
+                isAdmin.value = true;
+            }
+        };
+
+        const  changeAvailability = async (carId)=>{
+            try {
+                const response = await api.put('/admin/car/changeAvailability/' + carId);
+                car.value.available = response.data;
+            } catch (error) {
+                console.error('Error :', error);
+            }
+        };
         onMounted(async () => {
             const carId = route.params.carId;
             try {
@@ -199,6 +221,7 @@ export default {
 
                 const responseUserId = await api.get('/user-id')
                 currentUserId.value = responseUserId.data;
+                checkUserRole();
             } catch (error) {
                 alert('Сталася помилка під час спроби отримати дані авто')
                 console.error('Error fetching car info:', error);
@@ -336,6 +359,7 @@ export default {
             }
         };
 
+        
         const fetchUpdatedCarInfo = async () => {
             const carId = route.params.carId;
             try {
@@ -387,7 +411,10 @@ export default {
             getRatingAlt,
             getRatingIcon,
             messageIcon,
-            getCarImageUrl
+            getCarImageUrl,
+            isAdmin,
+            checkUserRole,
+            changeAvailability
         };
     }
 };
@@ -398,37 +425,30 @@ export default {
     margin: 30px 15%;
     height: 100%;
 }
-
 .header-text {
     padding: 5px;
     font-weight: bold;
     font-size: 25px;
 }
-
 .section-car-info {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
-
 .main-info {
     width: 70%;
     display: flex;
     flex-direction: column;
 }
-
-
 .car-gallery {
     max-width: 449px;
     overflow: hidden;
     text-align: center;
     margin: 0 auto;
 }
-
 .swiper-container {
     margin: 10px 0;
 }
-
 #nextButton,
 #prevButton {
     background-color: #282d3e;
@@ -437,50 +457,41 @@ export default {
     cursor: pointer;
     border: none;
 }
-
 .car-full-info {
     margin: 20px 0;
     border-radius: 20px;
     border: 1px solid #ccc;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-
 .full-info-text {
     margin: 15px 0 10px 20px;
     font-size: 24px;
     font-weight: bold;
     text-align: center;
 }
-
 .full-info-table {
     margin: 0 10px 10px 15px;
     display: flex;
     justify-content: space-between; /* Розташування блоків зліва і справа */
 }
-
 .full-info-table-left {
     width: 48%;
 }
-
 .full-info-table-right {
     width: 48%;
 }
-
 .full-info-table table {
     width: 100%; /* Таблиці займають всю ширину своїх блоків */
 }
-
 .full-info-table table td {
     padding: 10px 5px;
     border-bottom: 1px solid #cccccc;
 }
-
 .car-reviews-container-text {
     font-weight: bold;
     font-size: 22px;
     padding-bottom: 15px;
 }
-
 #reviews-add-button {
     background-color: #282d3e;
     color: aliceblue;
@@ -492,11 +503,9 @@ export default {
     border: none;
     margin-bottom: 10px;
 }
-
 #reviews-add-button img {
     margin-right: 10px;
 }
-
 .car-review {
     border-radius: 20px;
     border: 1px solid #ccc;
@@ -504,7 +513,6 @@ export default {
     padding: 15px;
     margin-bottom: 10px;
 }
-
 .review-user {
     display: flex;
     align-items: center;
@@ -512,23 +520,19 @@ export default {
     font-size: 18px;
     font-weight: bold;
 }
-
 .review-user img {
     margin-right: 10px;
     width: 40px;
 }
-
 .review-rating {
     margin-bottom: 10px;
     font-size: 18px;
     display: flex;
     align-items: center;
 }
-
 .review-rating span {
     margin: 4px 5px 0 0;
 }
-
 .review-comment p {
     width: 100%;
     word-wrap: break-word;
@@ -537,6 +541,33 @@ export default {
     margin: 0;
 }
 
+.aside-info-admin{
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    height: 100px;
+}
+.aside-info-admin span{
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.aside-info-admin button{
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #282d3e;
+    color: aliceblue;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
 .aside-info {
     width: 28%;
 }
@@ -548,7 +579,6 @@ export default {
     padding: 20px;
     width: 100%;
 }
-
 .aside-info-text span {
     display: block;
     font-size: 24px;
@@ -556,7 +586,6 @@ export default {
     margin-bottom: 15px;
     text-align: center;
 }
-
 .date-selection label {
     display: block;
     margin: 10px 0 5px;
