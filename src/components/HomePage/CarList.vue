@@ -101,7 +101,6 @@ export default {
         this.message = 'Виникла помилка при отриманні автомобілів.';
       }
     },
-    
     updateCarList(filteredCars){
         this.filteredCars =  filteredCars;
       if (!filteredCars.length) {

@@ -76,6 +76,7 @@ export default {
         items: [
           { label: 'Особистий кабінет', value: '/account', isLink: true },
           { label: 'Зареєструватися', value: '/registration', isLink: true },
+          {label: 'Сторінка адміністратора', value: '/admin', isLink: true}
         ],
       },
     ]);
