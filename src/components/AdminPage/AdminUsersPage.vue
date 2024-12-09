@@ -4,8 +4,15 @@
             <div class="container-text">
                 <span>Список користувачів</span>
             </div>
+            <div class="search-container">
+                <input 
+                type="text" 
+                v-model="searchQuery" 
+                placeholder="Пошук за лоіном, ім'ям, фамілією або ID"
+            />
+            </div>
             <div class="user-list">
-                <div v-for="user in users" :key="user.userId" class="user-card">
+                <div v-for="user in filteredUsers" :key="user.userId" class="user-card">
                     <div>
                         <h3>{{ user.username }}</h3>
                         <p><strong>ID:</strong> {{ user.userId || 'Не вказано'}}</p>
@@ -39,10 +46,23 @@ export default {
     data() {
         return {
             users: [],
+            searchQuery: '',
         };
     },
     mounted() {
         this.getUsers(); 
+    },
+    computed: {
+        filteredUsers() {
+            const queryWords = this.searchQuery.toLowerCase().split(' ').filter(word => word.trim() !== '');
+            return this.users.filter(user =>
+            queryWords.every(word =>
+            user.username.toLowerCase().includes(word) ||
+                user.firstName.toLowerCase().includes(word) ||
+                user.lastName.toLowerCase().includes(word) ||
+                user.userId.toString().includes(word)
+            ));
+        },
     },
     methods: {
         async getUsers() {
@@ -50,8 +70,6 @@ export default {
                 const response = await api.get('/getAllUsers');
                 if (response.data) {
                     this.users = response.data;
-                    console.log(this.users);
-                     
                 } else {
                     alert('Не вдалося отримати список користувачів!');
                 }
@@ -156,5 +174,17 @@ export default {
     font-weight: bold;
     cursor: pointer;
     margin-top: 10px;
+}
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>

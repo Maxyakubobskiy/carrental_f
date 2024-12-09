@@ -73,7 +73,14 @@ const routes = [
     { 
         path: '/account', 
         component: UserAccount, 
-        beforeEnter: async (to, from, next) => { if (await validateToken(next)) next(); } 
+        beforeEnter: async (to, from, next) => { 
+            if (await validateToken(next)){
+            const token = localStorage.getItem('token');
+            const decodedToken = jwtDecode(token);
+            const userRole = decodedToken.roles;
+            if (userRole && userRole.includes('ROLE_ADMIN')) {next('/admin');}
+            next(); } 
+        } 
     },
     { path: '/loginAdmin', component: AdminLoginPage },
     { 

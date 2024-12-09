@@ -7,8 +7,13 @@
         <div class="search-top">
             <h1>Прокат автомобілів в Україні від Car Rental</h1>
         </div>
-        <div class="search-bottom">
-            <div class="search-top-filter">
+        <div class="navigation-arrows">
+            <button @click="switchBlock('left')" class="arrow-button left">
+            <img :src="arrowLeftIcon" alt="Previous" style="filter: invert(100%)">
+            </button>
+            <div class="search-bottom">
+            <div v-if="activeBlock === 'filter'">
+                <div class="search-top-filter" >
                 <div class="search-nav-image">
                     <img :src="searchIcon" alt="search" style="filter: invert(100%)">
                     <span>Пошук</span>
@@ -115,7 +120,45 @@
                     </button>
                 </div>
             </form>
+            </div>
+            
+
+            <div v-if="activeBlock === 'sort'">
+                <div class="search-top-filter" >
+                <div class="search-nav-image">
+                    <img :src="searchIcon" alt="search" style="filter: invert(100%)">
+                    <span>Пошук</span>
+                </div>
+                <div class="search-nav-text">
+                    <span>Підберіть параметри сортування</span>
+                </div>
+                </div>
+                    <form @submit.prevent="submitSort" id="sort-form">
+                        <div class="search-middle-filter">
+                        <div class="sort-options">
+                            <label v-for="sort in sortValues" :key="sort.value" class="radio-option">
+                                <input type="radio" v-model="sortOption" :value="sort.value" class="radio-input">
+                                <span class="custom-radio" :class="{checked: sortOption === sort.value}">
+                                        <img :src="checkIcon" style="filter: invert(100%)" alt="" class="checkmark">
+                                </span>
+                                <span>{{ sort.lable }}</span>
+                            </label>
+                        </div>
+                        </div>
+                    <div class="search-bottom-filter">
+                    <button type="submit" id="button-submit-sort">
+                    <img :src="searchIcon" alt="" style="filter: invert(100%)">
+                    <span>Застосувати сортування</span>
+                    </button>
+                </div>
+                </form>
+            </div>
         </div>
+            <button @click="switchBlock('right')" class="arrow-button right">
+            <img :src="arrowRightIcon" alt="Next" style="filter: invert(100%)">
+            </button>
+        </div>
+        
     </div>
 </div>
 
@@ -132,7 +175,8 @@ import searchIcon from '@/assets/images/search.svg';
 import caretIcon from '@/assets/images/caret-down.svg';
 import checkIcon from '@/assets/images/check.svg';
 import binIcon from '@/assets/images/bin-simple.svg';
-
+import arrowLeftIcon from '@/assets/images/arrow-left.svg';
+import arrowRightIcon from '@/assets/images/arrow-right.svg';
 export default {
     components:{
         CarList
@@ -144,6 +188,16 @@ export default {
             caretIcon,
             checkIcon,
             binIcon,
+            arrowLeftIcon,
+            arrowRightIcon,
+            activeBlock: 'filter',
+            sortOption: null,
+            sortValues:[
+                {value: 'price-asc', lable:'За ціною (зростання)'},
+                {value: 'price-desc', lable:'За ціною (спадання)'},
+                {value: 'year-asc', lable:'За роком випуску (зростання)'},
+                {value: 'year-desc', lable:'За роком випуску (спадання)'},
+            ],
             selectedClasses: [],
             carClasses: [
                 { value: 'Economy', label: 'Економ', image: require('@/assets/images/car-class-1.svg') },
@@ -185,7 +239,7 @@ export default {
             ],
             selectedYearFrom: null,
             selectedYearTo: null,
-            years: [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010],
+            years: [2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000],
             
             dropdowns: {
                 classCar: false,
@@ -217,6 +271,22 @@ export default {
         EventBus.off('filterCars', this.handleFilterCars);
     },
     methods:{
+        switchBlock(direction) {
+            if (direction === 'left') {
+                this.activeBlock = this.activeBlock === 'filter' ? 'sort' : 'filter';
+            } else if (direction === 'right') {
+                this.activeBlock = this.activeBlock === 'sort' ? 'filter' : 'sort';
+            }
+        },
+        async submitSort() {
+        try {
+            const response = await api.post('/sortCars', { sortOption: this.sortOption });
+            this.$refs.carList.updateCarList(response.data);
+        } catch (error) {
+            alert('Сталася помилка!');
+            console.error('Error sorting cars:', error);
+        }
+        },
         toggleDropdown(dropdown) {
             Object.keys(this.dropdowns).forEach(key => {
                 this.dropdowns[key] = (key === dropdown) ? !this.dropdowns[key] : false;
