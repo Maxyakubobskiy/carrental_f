@@ -125,7 +125,24 @@ ul {
     padding-bottom: 20px;
 
 }
+.navigation-arrows {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+}
+.arrow-button {
+  background: #282d3e;
+  border: none;
+  cursor: pointer;
+  border-radius: 30px;
+  margin: 10px;
+}
 
+.arrow-button img {
+  width: 60px;
+  height: 35px;
+}
 .drop {
     position: relative;
     display: inline-block;
@@ -240,7 +257,17 @@ ul {
 .year-to::-webkit-scrollbar-thumb:hover {
     background: #1b1f2a; /* колір полоси прокрутки при наведенні */
 }
-
+.sort-options{
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Дві колонки */
+    justify-content: space-between; /* Рівномірно розташувати */
+}
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Відступ між радіокнопкою та текстом */
+}
+.sort-options label,
 .year-to label,
 .year-from label {
     display: flex;
@@ -341,10 +368,12 @@ ul {
     margin-left: 5px;
 }
 
+#button-submit-sort img,
 #button-submit-filter img {
     margin-right: 5px;
 }
 
+#button-submit-sort,
 #button-submit-filter {
     margin-left: auto;
 }

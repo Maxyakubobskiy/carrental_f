@@ -4,8 +4,15 @@
             <div class="container-text">
                 <span>Список орендованих машин</span>
             </div>
+            <div class="search-container">
+                <input 
+                type="text" 
+                v-model="searchQuery" 
+                placeholder="Пошук за брендом, моделлю або ID"
+            />
+            </div>
             <div class="car-list">
-                <div v-for="car in cars" :key="car.carId" class="car-card">
+                <div v-for="car in filteredCars" :key="car.carId" class="car-card">
                     <div>
                         <h3>{{ car.brand }} {{ car.model }}</h3>
                         <p><strong>ID:</strong> {{ car.carId }}</p>
@@ -53,17 +60,29 @@ export default {
     data() {
         return {
             cars: [],
+            searchQuery: '',
         };
     },
     mounted() {
         this.getCars(); 
+    },
+    computed: {
+        filteredCars() {
+            const queryWords = this.searchQuery.toLowerCase().split(' ').filter(word => word.trim() !== '');
+            return this.cars.filter(car =>
+            queryWords.every(word =>
+                car.brand.toLowerCase().includes(word) ||
+                car.model.toLowerCase().includes(word) ||
+                car.carId.toString().includes(word) 
+            ));
+        },
     },
     methods: {
         async getCars() {
             try {
                 const response = await api.get('/list-noavail-cars');
                 if (response.data) {
-                    this.cars = response.data;
+                    this.cars = response.data; 
                     console.log(this.cars);
                      
                 } else {
@@ -170,5 +189,17 @@ export default {
     font-weight: bold;
     cursor: pointer;
     margin-top: 10px;
+}
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>
