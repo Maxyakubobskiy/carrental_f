@@ -38,11 +38,13 @@
 import { ref } from 'vue';
 import logo from '@/assets/images/logo.png';
 import { EventBus } from '@/event/bus';
-
+import { useRouter } from 'vue-router';
+  
 export default {
   setup() {
     const logoSrc = ref(logo);
-
+    const router = useRouter();
+    
     const footerNavItems = ref([
       {
         title: 'Класи авто',
@@ -83,7 +85,11 @@ export default {
 
     const filterCars = (item) => {
       if (item.isLink) {
-        window.location.href = item.value;
+        if (item.value.startsWith('/')) {
+          router.push(item.value);
+        } else {
+          window.location.href = item.value;
+        }
       } else {
         EventBus.emit('filterCars', item);
       }
