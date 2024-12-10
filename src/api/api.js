@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api' // Ваш базовий URL бекенду
+  baseURL: 'https://carrentalb-production.up.railway.app/api' // Ваш базовий URL бекенду
 });
 
 api.interceptors.request.use((confirg)=>{
